@@ -4,6 +4,10 @@ class Activity {
   String? id;
   String city;
 
-  Activity(
-      {required this.name, required this.city, this.id, required this.image});
+  Activity({
+    required this.name,
+    required this.city,
+    this.id,
+    required this.image,
+  });
 }
