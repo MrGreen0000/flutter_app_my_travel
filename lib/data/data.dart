@@ -33,7 +33,7 @@ List<Activity> activities = [
       city: 'Paris'),
   Activity(
       image: 'assets/images/activities/bibliotheque_mitterrand.jpg',
-      name: 'Bibiothèque Mittérrand',
+      name: 'Bibliothèque Mittérrand',
       id: 'a7',
       city: 'Paris'),
   Activity(

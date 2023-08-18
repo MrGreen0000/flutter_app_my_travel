@@ -1,7 +1,7 @@
 class Trip {
   String city;
   List<String> activities;
-  DateTime date;
+  DateTime? date;
 
   Trip({
     required this.city,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_travel/models/activity.model.dart';
 import 'package:my_travel/data/data.dart' as data;
 import 'package:my_travel/models/trip.model.dart';
-import 'package:my_travel/views/widgets/activity_card.dart';
+import 'package:my_travel/views/widgets/activity_list.dart';
+import 'package:my_travel/views/widgets/trip_activity_list.dart';
+import 'package:my_travel/views/widgets/trip_overview.dart';
 
 class City extends StatefulWidget {
   final List<Activity> activities = data.activities;
@@ -14,47 +15,88 @@ class City extends StatefulWidget {
 }
 
 class _CityState extends State<City> {
-  Trip myTrip = Trip(city: "Paris", activities: [], date: DateTime.now());
+  late Trip myTrip;
+
+  late int index;
+
+  @override
+  void initState() {
+    super.initState();
+    myTrip = Trip(activities: [], city: "Paris", date: null);
+    index = 0;
+  }
+
+  List<Activity> get tripActivities {
+    return widget.activities
+        .where((activity) => myTrip.activities.contains(activity.id))
+        .toList();
+  }
+
+  void setDate() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2025),
+    ).then((newDate) {
+      if (newDate != null) {
+        setState(() {
+          myTrip.date = newDate;
+        });
+      }
+    });
+  }
+
+  void switchIndex(newIndex) {
+    setState(() {
+      index = newIndex;
+    });
+  }
+
+  void toogleActivity(String id) {
+    setState(() {
+      myTrip.activities.contains(id)
+          ? myTrip.activities.remove(id)
+          : myTrip.activities.add(id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: const Icon(Icons.chevron_left),
-          title: const Text('Paris'),
-          actions: const <Widget>[Icon(Icons.more_vert)],
-        ),
-        body: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              height: 150,
-              color: Colors.white,
-              child: Column(children: [
-                Row(
-                  children: [
-                    const Padding(padding: EdgeInsets.all(8)),
-                    Expanded(
-                      child: Text(DateFormat("d/M/y").format(myTrip.date)),
-                    ),
-                    ElevatedButton(
-                      child: const Text("Selectionner une date"),
-                      onPressed: () {},
+      appBar: AppBar(
+        leading: const Icon(Icons.chevron_left),
+        title: const Text('Organisation du voyage'),
+        actions: const <Widget>[Icon(Icons.more_vert)],
+      ),
+      body: Column(
+        children: [
+          TripOverview(setDate: setDate, myTrip: myTrip),
+          Expanded(
+              child: index == 0
+                  ? ActivityList(
+                      activiies: widget.activities,
+                      selectedActivities: myTrip.activities,
+                      toogleActivity: toogleActivity,
                     )
-                  ],
-                )
-              ]),
-            ),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 2,
-                crossAxisSpacing: 5,
-                children: widget.activities
-                    .map((activity) => ActivityCard(activity: activity))
-                    .toList(),
-              ),
-            ),
-          ],
-        ));
+                  : TripActivityList(
+                      activities: tripActivities,
+                    )),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: "Découvert",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.stars),
+            label: "Mes activités",
+          ),
+        ],
+        onTap: switchIndex,
+      ),
+    );
   }
 }
