@@ -3,9 +3,11 @@ import 'package:my_travel/models/activity.model.dart';
 
 class TripActivityList extends StatelessWidget {
   final List<Activity> activities;
+  final Function deleteTripActivity;
 
   const TripActivityList({
     required this.activities,
+    required this.deleteTripActivity,
     super.key,
   });
 
@@ -20,7 +22,14 @@ class TripActivityList extends StatelessWidget {
               backgroundImage: AssetImage(activity.image),
             ),
             title: Text(activity.name),
-            trailing: const Icon(Icons.delete),
+            subtitle: Text(activity.city),
+            trailing: IconButton(
+              onPressed: () => deleteTripActivity(activity.id),
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.red,
+              ),
+            ),
           ),
         );
       }),

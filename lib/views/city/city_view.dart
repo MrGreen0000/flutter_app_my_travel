@@ -6,17 +6,31 @@ import 'package:my_travel/views/widgets/activity_list.dart';
 import 'package:my_travel/views/widgets/trip_activity_list.dart';
 import 'package:my_travel/views/widgets/trip_overview.dart';
 
-class City extends StatefulWidget {
+class CityView extends StatefulWidget {
   final List<Activity> activities = data.activities;
-  City({super.key});
+  CityView({super.key});
+
+  showContext({required BuildContext context, required List<Widget> children}) {
+    final orientation = MediaQuery.of(context).orientation;
+
+    if (orientation == Orientation.landscape) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      );
+    } else {
+      return Column(
+        children: children,
+      );
+    }
+  }
 
   @override
-  State<City> createState() => _CityState();
+  State<CityView> createState() => _CityViewState();
 }
 
-class _CityState extends State<City> {
+class _CityViewState extends State<CityView> {
   late Trip myTrip;
-
   late int index;
 
   @override
@@ -61,6 +75,12 @@ class _CityState extends State<City> {
     });
   }
 
+  void deleteTripActivity(String id) {
+    setState(() {
+      myTrip.activities.remove(id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,20 +89,24 @@ class _CityState extends State<City> {
         title: const Text('Organisation du voyage'),
         actions: const <Widget>[Icon(Icons.more_vert)],
       ),
-      body: Column(
-        children: [
-          TripOverview(setDate: setDate, myTrip: myTrip),
-          Expanded(
-              child: index == 0
-                  ? ActivityList(
-                      activiies: widget.activities,
-                      selectedActivities: myTrip.activities,
-                      toogleActivity: toogleActivity,
-                    )
-                  : TripActivityList(
-                      activities: tripActivities,
-                    )),
-        ],
+      body: Container(
+        child: widget.showContext(
+          context: context,
+          children: [
+            TripOverview(setDate: setDate, myTrip: myTrip),
+            Expanded(
+                child: index == 0
+                    ? ActivityList(
+                        activiies: widget.activities,
+                        selectedActivities: myTrip.activities,
+                        toogleActivity: toogleActivity,
+                      )
+                    : TripActivityList(
+                        activities: tripActivities,
+                        deleteTripActivity: deleteTripActivity,
+                      )),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [
