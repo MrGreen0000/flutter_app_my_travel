@@ -5,6 +5,7 @@ import 'package:my_travel/models/trip.model.dart';
 class TripOverview extends StatelessWidget {
   final VoidCallback setDate;
   final Trip myTrip;
+  final String cityName;
 
   double get amount {
     return 0;
@@ -13,6 +14,7 @@ class TripOverview extends StatelessWidget {
   const TripOverview({
     required this.setDate,
     required this.myTrip,
+    required this.cityName,
     super.key,
   });
 
@@ -30,10 +32,10 @@ class TripOverview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Paris",
-            style:
-                TextStyle(fontSize: 25, decoration: TextDecoration.underline),
+          Text(
+            cityName,
+            style: const TextStyle(
+                fontSize: 25, decoration: TextDecoration.underline),
           ),
           const SizedBox(
             height: 30,

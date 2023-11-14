@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:my_travel/models/activity.model.dart';
 import 'package:my_travel/data/data.dart' as data;
+import 'package:my_travel/models/city_model.dart';
 import 'package:my_travel/models/trip.model.dart';
 import 'package:my_travel/views/widgets/activity_list.dart';
 import 'package:my_travel/views/widgets/trip_activity_list.dart';
 import 'package:my_travel/views/widgets/trip_overview.dart';
 
 class CityView extends StatefulWidget {
+  static const String routeName = '/city';
   final List<Activity> activities = data.activities;
-  CityView({super.key});
+  final City city;
+  CityView({super.key, required this.city});
 
   showContext({required BuildContext context, required List<Widget> children}) {
     final orientation = MediaQuery.of(context).orientation;
@@ -85,7 +88,12 @@ class _CityViewState extends State<CityView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const Icon(Icons.chevron_left),
+        leading: IconButton(
+          icon: const Icon(Icons.chevron_left),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         title: const Text('Organisation du voyage'),
         actions: const <Widget>[Icon(Icons.more_vert)],
       ),
@@ -93,7 +101,11 @@ class _CityViewState extends State<CityView> {
         child: widget.showContext(
           context: context,
           children: [
-            TripOverview(setDate: setDate, myTrip: myTrip),
+            TripOverview(
+              setDate: setDate,
+              myTrip: myTrip,
+              cityName: widget.city.name,
+            ),
             Expanded(
                 child: index == 0
                     ? ActivityList(

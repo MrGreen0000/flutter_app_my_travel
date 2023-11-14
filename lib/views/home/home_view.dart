@@ -3,6 +3,7 @@ import 'package:my_travel/models/city_model.dart';
 import 'package:my_travel/views/widgets/city_card.dart';
 
 class HomeView extends StatefulWidget {
+  static const String routeName = '/';
   const HomeView({super.key});
 
   @override
