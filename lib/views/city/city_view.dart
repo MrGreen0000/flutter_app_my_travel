@@ -3,6 +3,7 @@ import 'package:my_travel/models/activity.model.dart';
 import 'package:my_travel/data/data.dart' as data;
 import 'package:my_travel/models/city_model.dart';
 import 'package:my_travel/models/trip.model.dart';
+import 'package:my_travel/views/home/home_view.dart';
 import 'package:my_travel/views/widgets/activity_list.dart';
 import 'package:my_travel/views/widgets/trip_activity_list.dart';
 import 'package:my_travel/views/widgets/trip_overview.dart';
@@ -49,6 +50,14 @@ class _CityViewState extends State<CityView> {
         .toList();
   }
 
+  double get amount {
+    return myTrip.activities.fold(0.00, (prev, element) {
+      var activity =
+          widget.activities.firstWhere((activity) => activity.id == element);
+      return prev + activity.price;
+    });
+  }
+
   void setDate() {
     showDatePicker(
       context: context,
@@ -84,6 +93,44 @@ class _CityViewState extends State<CityView> {
     });
   }
 
+  void saveTrip() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        return SimpleDialog(
+          title: const Text('Voulez vous sauvegarder ?'),
+          contentPadding: const EdgeInsets.all(20),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, 'cancel');
+                  },
+                  child: const Text('annuler'),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor),
+                  onPressed: () {
+                    Navigator.pop(context, 'save');
+                  },
+                  child: const Text('sauvegarder'),
+                ),
+              ],
+            )
+          ],
+        );
+      },
+    );
+    print(result);
+    Navigator.pushNamed(context, HomeView.routeName);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,6 +152,7 @@ class _CityViewState extends State<CityView> {
               setDate: setDate,
               myTrip: myTrip,
               cityName: widget.city.name,
+              amount: amount,
             ),
             Expanded(
                 child: index == 0
@@ -119,6 +167,10 @@ class _CityViewState extends State<CityView> {
                       )),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.forward),
+        onPressed: saveTrip,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_travel/models/city_model.dart';
 import 'package:my_travel/views/widgets/city_card.dart';
+import 'package:my_travel/widgets/ask_modal.dart';
 
 class HomeView extends StatefulWidget {
   static const String routeName = '/';
@@ -16,6 +17,12 @@ class _HomeViewState extends State<HomeView> {
     City(image: 'assets/images/biarritz.jpg', name: 'Biarritz'),
     City(image: 'assets/images/paris.jpg', name: 'Paris'),
   ];
+
+  openModal() {
+    askModal(context, 'hello veux tu quelques  chose ?').then((result) {
+      print(result);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +40,7 @@ class _HomeViewState extends State<HomeView> {
             ...cities.map(
               (city) => CityCard(city: city),
             ),
+            ElevatedButton(onPressed: openModal, child: Text('Modal'))
           ],
         ),
       ),
