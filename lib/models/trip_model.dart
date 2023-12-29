@@ -1,11 +1,15 @@
+import 'package:flutter/material.dart';
+import 'package:my_travel/models/activity.model.dart';
+
 class Trip {
+  String id;
   String city;
-  List<String> activities;
+  List<Activity> activities;
   DateTime? date;
 
   Trip({
     required this.city,
     required this.activities,
-    required this.date,
-  });
+    this.date,
+  }) : id = UniqueKey().toString();
 }

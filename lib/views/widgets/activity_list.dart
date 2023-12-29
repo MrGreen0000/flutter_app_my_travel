@@ -5,7 +5,7 @@ import 'package:my_travel/views/widgets/activity_card.dart';
 class ActivityList extends StatelessWidget {
   final List<Activity> activiies;
   final Function toogleActivity;
-  final List<String> selectedActivities;
+  final List<Activity> selectedActivities;
 
   const ActivityList({
     required this.activiies,
@@ -24,8 +24,8 @@ class ActivityList extends StatelessWidget {
           .map(
             (activity) => ActivityCard(
               activity: activity,
-              isSelected: selectedActivities.contains(activity.id),
-              toogleActivity: () => toogleActivity(activity.id),
+              isSelected: selectedActivities.contains(activity),
+              toogleActivity: () => toogleActivity(activity),
             ),
           )
           .toList(),

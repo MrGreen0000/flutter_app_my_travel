@@ -2,25 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:my_travel/models/activity.model.dart';
 import 'package:my_travel/models/city_model.dart';
 import 'package:my_travel/models/trip_model.dart';
+import 'package:my_travel/providers/city_provider.dart';
+import 'package:my_travel/providers/trip_provider.dart';
 import 'package:my_travel/views/home/home_view.dart';
 import 'package:my_travel/views/widgets/activity_list.dart';
 import 'package:my_travel/views/widgets/trip_activity_list.dart';
 import 'package:my_travel/views/widgets/trip_overview.dart';
 import 'package:my_travel/widgets/dyma_drawer.dart';
+import 'package:provider/provider.dart';
 
 class CityView extends StatefulWidget {
   static const String routeName = '/city';
-  final City city;
-  final Function addTrip;
-
-  List<Activity> get activities {
-    return city.activities;
-  }
 
   const CityView({
     super.key,
-    required this.city,
-    required this.addTrip,
   });
 
   showContext({required BuildContext context, required List<Widget> children}) {
@@ -46,25 +41,21 @@ class _CityViewState extends State<CityView> {
   late Trip mytrip;
   late int index;
 
-  List<Activity> get tripActivities {
-    return widget.activities
-        .where((activity) => mytrip.activities.contains(activity.id))
-        .toList();
+  @override
+  void initState() {
+    super.initState();
+    mytrip = Trip(
+      activities: [],
+      city: '',
+      date: null,
+    );
+    index = 0;
   }
 
   double get amount {
     return mytrip.activities.fold(0.00, (prev, element) {
-      var activity =
-          widget.activities.firstWhere((activity) => activity.id == element);
-      return prev + activity.price;
+      return prev + element.price;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    mytrip = Trip(activities: [], city: "Paris", date: null);
-    index = 0;
   }
 
   void setDate() {
@@ -88,21 +79,21 @@ class _CityViewState extends State<CityView> {
     });
   }
 
-  void toogleActivity(String id) {
+  void toogleActivity(Activity activity) {
     setState(() {
-      mytrip.activities.contains(id)
-          ? mytrip.activities.remove(id)
-          : mytrip.activities.add(id);
+      mytrip.activities.contains(activity)
+          ? mytrip.activities.remove(activity)
+          : mytrip.activities.add(activity);
     });
   }
 
-  void deleteTripActivity(String id) {
+  void deleteTripActivity(Activity activity) {
     setState(() {
-      mytrip.activities.remove(id);
+      mytrip.activities.remove(activity);
     });
   }
 
-  void saveTrip() async {
+  void saveTrip(String cityName) async {
     final result = await showDialog(
       context: context,
       builder: (context) {
@@ -113,6 +104,15 @@ class _CityViewState extends State<CityView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, 'cancel');
+                  },
+                  child: const Text('Annuler'),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor),
@@ -126,29 +126,45 @@ class _CityViewState extends State<CityView> {
                     ),
                   ),
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'cancel');
-                  },
-                  child: const Text('Annuler'),
-                ),
               ],
             )
           ],
         );
       },
     );
-    if (result == 'save') {
-      widget.addTrip(mytrip);
-      if (mounted) Navigator.pushNamed(context, HomeView.routeName);
+    if (mytrip.date == null) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Attention !'),
+              content: const Text('Vous n\'avez pas entré de date'),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('ok'))
+              ],
+            );
+          },
+        );
+      }
+    } else if (result == 'save') {
+      mytrip.city = cityName;
+      if (mounted) {
+        Provider.of<TripProvider>(context, listen: false).addTrip(mytrip);
+        Navigator.pushNamed(context, HomeView.routeName);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    String cityName = ModalRoute.of(context)!.settings.arguments as String;
+    City city = Provider.of<CityProvider>(context).getCityByName(cityName);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Organisation du voyage'),
@@ -161,25 +177,27 @@ class _CityViewState extends State<CityView> {
             TripOverview(
               setDate: setDate,
               myTrip: mytrip,
-              cityName: widget.city.name,
+              cityName: city.name,
               amount: amount,
             ),
             Expanded(
                 child: index == 0
                     ? ActivityList(
-                        activiies: widget.activities,
+                        activiies: city.activities,
                         selectedActivities: mytrip.activities,
                         toogleActivity: toogleActivity,
                       )
                     : TripActivityList(
-                        activities: tripActivities,
+                        activities: mytrip.activities,
                         deleteTripActivity: deleteTripActivity,
                       )),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: saveTrip,
+        onPressed: () {
+          saveTrip(city.name);
+        },
         child: const Icon(Icons.forward),
       ),
       bottomNavigationBar: BottomNavigationBar(
